@@ -1,0 +1,88 @@
+x-backend-env: &bot-env
+  ENVIRONMENT: ${ENVIRONMENT}
+  APP_HOST: ${APP_HOST}
+  APP_PORT: ${APP_PORT}
+  REDIS_HOST: ${REDIS_HOST}
+  REDIS_PORT: ${REDIS_PORT}
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+  REDIS_USER: ${REDIS_USER}
+  REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
+  RABBITMQ_USER: ${RABBITMQ_USER}
+  RABBITMQ_PASS: ${RABBITMQ_USER}
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: ci-cd-files/Dockerfile
+      target: production
+      args:
+        MODE: prod
+    command: uvicorn src.app.main:app --reload --host ${APP_HOST} --port ${APP_PORT} --log-level debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment: *bot-env
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      - ..:/app
+    depends_on:
+      - redis
+    restart: always
+    networks:
+      - network
+
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    environment: *bot-env
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - ./redisdata:/data
+    networks:
+      - network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment: *bot-env
+    networks:
+      - network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  rmq-consumer:
+    build:
+      context: ..
+      dockerfile: ci-cd-files/Dockerfile
+      target: production
+      args:
+        MODE: prod
+    container_name: rmq-consumer
+    command: sh -c "PYTHONPATH=/app python /app/src/app/integrations/rmq/consumer.py"
+    restart: always
+    environment: *bot-env
+    volumes:
+      - ..:/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - network
+
+networks:
+  network:
+    external: true

@@ -1,0 +1,31 @@
+default_language_version:
+  python: python3.11
+default_stages: [commit, push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.0.1"
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        files: "^src/"
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        args: ["-l", "79", "-v"]
+        language_version: python3.11
+        files: "^src/"
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        files: "^src/"
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["-rc", "--diff", "--profile", "black", "--fass"]
+        files: "^src/"
+        name: isort (python)

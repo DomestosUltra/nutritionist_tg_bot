@@ -1,0 +1,26 @@
+x-backend-env: &bot-env
+  ENVIRONMENT: ${ENVIRONMENT}
+  APP_HOST: ${APP_HOST}
+  APP_PORT: ${APP_PORT}
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: ci-cd-files/Dockerfile
+      target: testing
+      args:
+        MODE: test
+    container_name: mcp-service-test
+    environment:
+      <<: *bot-env
+      PYTHONPATH: "/app"
+    tty: true
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      - ..:/app
+
+
+networks:
+  default:

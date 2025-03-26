@@ -1,0 +1,91 @@
+version: '3'
+
+dotenv: [".env"]
+
+vars: &vars
+  PROJECT_NAME: mcp-service
+  COMPOSE_FILE_PATH: ci-cd-files/docker-compose.yml
+  TEST_COMPOSE_FILE_PATH: ci-cd-files/docker-compose-test.yml
+  FORMAT_FOLDER: src
+
+tasks:
+  default:
+    desc: Список всех доступных задач
+    cmds:
+      - task --list
+
+  run:
+    desc: Запуск проекта локально. Доступ по адресу localhost:8000
+    cmds:
+      - uvicorn src.main:app --reload --host 0.0.0.0 --port 8000 --log-level info
+
+  build:
+    desc: Сборка проекта
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE_PATH}} --env-file=.env build
+
+  up:
+    desc: Запуск проекта как compose сервис с БД
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE_PATH}} up
+  
+  build-up:
+    desc: Сборка и запуск проекта
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE_PATH}} --env-file=.env up --build
+
+  tests:
+    desc: Запуск тестов проекта
+    cmds:
+      - docker compose -f {{.TEST_COMPOSE_FILE_PATH}} --env-file=.env up --build --abort-on-container-exit
+
+  down:
+    desc: Остановка compose сервиса
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE_PATH}} --env-file=.env down --remove-orphans
+
+  down_:
+    desc: Остановка compose сервиса с очисткой volumes
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE_PATH}} --env-file=.env down -v --remove-orphans
+
+  restart:
+    desc: Перезапуск compose сервиса
+    cmds:
+      - docker compose -f {{.COMPOSE_FILE_PATH}} --env-file=.env down --remove-orphans
+      - docker compose -f {{.COMPOSE_FILE_PATH}} --env-file=.env up -d
+
+  black:
+    desc: black
+    cmds:
+      - black {{.FORMAT_FOLDER}}
+
+  flake8:
+    desc: flake8
+    cmds:
+      - flake8 {{.FORMAT_FOLDER}}
+
+  isort:
+    desc: isort
+    cmds:
+      - isort {{.FORMAT_FOLDER}} --fass
+
+  pre-commit:
+    desc: pre-commit
+    cmds:
+      - pre-commit run --all-files
+
+  format:
+    desc: Форматирование кода
+    cmds:
+      - isort {{.FORMAT_FOLDER}} --fass
+      - black {{.FORMAT_FOLDER}}
+      - flake8 {{.FORMAT_FOLDER}}
+
+  format_:
+    desc: Форматирование кода и pre-commit
+    cmds:
+      - isort {{.FORMAT_FOLDER}} --fass
+      - black {{.FORMAT_FOLDER}}
+      - flake8 {{.FORMAT_FOLDER}}
+      - pre-commit
