@@ -6,9 +6,7 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
-RUN pip install --upgrade pip setuptools poetry \
-    --timeout 60 \
-    --index-url https://mirrors.cloud.tencent.com/pypi/simple/ && \
+RUN pip install --upgrade pip setuptools poetry && \
     poetry config virtualenvs.create false
 
 ARG MODE=prod
