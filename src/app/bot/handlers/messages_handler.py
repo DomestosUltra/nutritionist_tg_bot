@@ -53,7 +53,7 @@ async def model_selection(callback: CallbackQuery):
     )
 
 
-@router.message()
+@router.message(F.text)
 async def handle_message(
     message: Message,
 ):
@@ -108,3 +108,8 @@ async def handle_message(
         user_query,
         response_text="",
     )
+
+
+@router.message()
+async def handle_non_text(message: Message):
+    await message.answer("*Пожалуйста, отправьте текстовое сообщение* 📝")
