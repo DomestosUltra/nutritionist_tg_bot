@@ -18,10 +18,6 @@ class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
             "src.tests",
-            "src.app.services.lifespan_events",
-            "src.app.services.webhooks",
-            "src.app.api.v1.endpoints.lifespan_events",
-            "src.app.api.v1.endpoints.webhooks",
             "src.app.integrations.rmq.consumer",
             "src.app.bot.handlers.messages_handler",
             "src.app.bot.handlers.command_handler",
@@ -78,10 +74,6 @@ class TestContainer(Container):
     wiring_config = containers.WiringConfiguration(
         modules=[
             "src.tests",
-            "src.app.services.lifespan_events",
-            "src.app.services.webhooks",
-            "src.app.api.v1.endpoints.lifespan_events",
-            "src.app.api.v1.endpoints.webhooks",
             "src.app.integrations.rmq.consumer",
             "src.app.bot.handlers.messages_handler",
             "src.app.bot.handlers.command_handler",

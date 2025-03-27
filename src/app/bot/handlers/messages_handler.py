@@ -42,7 +42,7 @@ async def model_selection(callback: CallbackQuery):
 
     await set_model(callback.from_user.id, model)
     await callback.message.answer(
-        f"Вы выбрали модель: {str_model}. Теперь введите ваш запрос."
+        f"*Вы выбрали модель: {str_model}* 🤖\nТеперь введи свой запрос для получения персональных рекомендаций по питанию\."
     )
 
     await log_interaction(
@@ -54,14 +54,12 @@ async def model_selection(callback: CallbackQuery):
 
 
 @router.message()
-@inject
 async def handle_message(
     message: Message,
-    redis_service: RedisService = Depends(Provide[Container.redis_service]),
 ):
     if not await check_rate_limit(message.from_user.id):
         await message.answer(
-            "Слишком много запросов. Пожалуйста, подождите немного."
+            "*Слишком много запросов\!*\nПожалуйста, подождите немного ⏳"
         )
         return
 
@@ -74,16 +72,19 @@ async def handle_message(
         model = model.decode("utf-8")
     elif model is None:
         await message.answer(
-            "Выбери модель:",
+            "_Выбери модель для начала работы:_",
             reply_markup=get_model_keyboard(),
         )
         return
 
-    # if await is_response_processing(user_id):
-    #     await message.answer("В процессе обработке. Отправьте запрос после ответа бота.")
-    #     return
+    if await is_response_processing(user_id):
+        await message.answer(
+            "*Запрос в обработке\.\.\.* ⏳\n"
+            "Пожалуйста, дождитесь завершения текущего запроса перед отправкой нового\."
+        )
+        return
 
-    waiting_message = await message.answer("Ожидайте ответ.")
+    waiting_message = await message.answer("*Ожидайте ответ\.\.\. ⏳*")
     waiting_message_id = waiting_message.message_id
 
     task = {

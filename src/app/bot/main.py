@@ -8,6 +8,6 @@ from src.app.core.config import settings
 
 bot = Bot(
     token=settings.bot.TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
 )
 dp = Dispatcher(storage=MemoryStorage())
