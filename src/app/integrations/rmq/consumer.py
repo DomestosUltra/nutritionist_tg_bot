@@ -1,12 +1,13 @@
-import asyncio
+import re
 import json
-import base64
+import asyncio
 import logging
 import aio_pika
 
-from typing import Dict, Union
+from typing import Dict
 from aiogram import Bot
 from logging.config import dictConfig
+from aiogram.enums import ParseMode
 
 from src.app.utils.log_config import LogConfig
 from src.app.core.config import settings
@@ -14,7 +15,11 @@ from src.app.core.containers import Container
 from src.app.integrations.redis import RedisService
 from src.app.integrations.llm.openai import OpenaiService
 from src.app.integrations.llm.yandexgpt import YandexService
+from src.app.core.prompts import SYSTEM_PROMPT
 from src.app.bot.main import bot
+from src.app.utils.general import (
+    convert_to_allowed_tags,
+)
 
 
 log_config = LogConfig()
@@ -59,19 +64,24 @@ class LLMTaskHandler(BaseTaskHandler):
                 raise ValueError(f"Unknown model: {model}")
 
             await self.redis_service.set(
-                f"task:{user_id}:status", "processing"
+                f"task:{user_id}:status", "processing", ex=60
             )
 
-            response_text = await llm_service.get_response(
-                user_query, system_prompt="Ты - профессиональный помощник."
+            response_text: str = await llm_service.get_response(
+                user_query, system_prompt=SYSTEM_PROMPT
             )
 
+            html_response_text = convert_to_allowed_tags(response_text)
             await self.bot.delete_message(
                 chat_id=chat_id, message_id=waiting_message_id
             )
-            await self.bot.send_message(text=response_text, chat_id=chat_id)
-
             await self.redis_service.set(f"task:{user_id}:status", "completed")
+            await self.bot.send_message(
+                text=html_response_text,
+                chat_id=chat_id,
+                parse_mode=ParseMode.HTML,
+            )
+
             await self.redis_service.set(
                 f"task:{task_id}:response", response_text, ex=60
             )

@@ -27,14 +27,14 @@ async def set_bot_commands(bot: Bot):
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    await message.answer("Привет! Я бот-диетолог.")
+    await message.answer(
+        "*Привет\! 👋*\nЯ – бот\-диетолог, готов помочь тебе улучшить питание и здоровье\!"
+    )
 
-    # Не работает
     start = await is_first_start(message.from_user.id)
-    logger.info(f"IS FIRST START: {start} {message.from_user.id}")
     if start:
         await message.answer(
-            "Выбери модель:",
+            "_Выбери модель для начала работы:_",
             reply_markup=get_model_keyboard(),
         )
 
@@ -48,7 +48,10 @@ async def cmd_start(message: Message):
 
 @router.message(Command("model"))
 async def cmd_model(message: Message):
-    await message.answer("Выберете модель:", reply_markup=get_model_keyboard())
+    await message.answer(
+        "*Выбор модели* 🤖\nПожалуйста, выбери одну из доступных моделей для получения рекомендаций:",
+        reply_markup=get_model_keyboard(),
+    )
 
     await log_interaction(
         message.from_user.id,
@@ -61,11 +64,12 @@ async def cmd_model(message: Message):
 @router.message(Command("help"))
 async def cmd_help(message: Message):
     help_text = (
-        "Доступные команды:\n"
-        "/start - Запуск бота\n"
-        "/help - Справка по командам\n"
-        "/exit - Завершение сессии\n"
-        "Для получения рекомендации введите ваш запрос и выберите модель."
+        "*Справка* ℹ️\n\n"
+        "*Доступные команды:*\n"
+        "`/start` — запуск бота\n"
+        "`/model` — выбор модели для ответа\n"
+        "`/help` — справка по командам\n\n"
+        "Для получения персональных рекомендаций просто отправь свой запрос\!\n"
     )
     await message.answer(help_text)
 
@@ -75,15 +79,3 @@ async def cmd_help(message: Message):
         "/help",
         help_text,
     )
-
-
-# @router.message(Command("exit"))
-# async def cmd_exit(message: Message):
-#     await message.answer("До свидания!")
-
-#     await log_interaction(
-#         message.from_user.id,
-#         message.from_user.username or "",
-#         "/exit",
-#         "Пользователь завершил сессию.",
-#     )
