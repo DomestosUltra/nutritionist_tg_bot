@@ -68,14 +68,15 @@ async def handle_message(
     user_query: str = str(message.text)
     model: str = await get_model(user_id)
 
-    if isinstance(model, bytes):
-        model = model.decode("utf-8")
-    elif model is None:
+    if model is None or not model:
         await message.answer(
-            "_Выбери модель для начала работы:_",
+            "*Выбери модель для начала работы:*",
             reply_markup=get_model_keyboard(),
         )
         return
+
+    if isinstance(model, bytes):
+        model = model.decode("utf-8")
 
     if await is_response_processing(user_id):
         await message.answer(
