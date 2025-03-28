@@ -39,10 +39,7 @@ class Container(containers.DeclarativeContainer):
         redis_client=redis_client,
     )
 
-    http_client_factory = providers.Factory(
-        httpx.AsyncClient,
-        verify=False
-    )
+    http_client_factory = providers.Factory(httpx.AsyncClient, verify=False)
 
     openai_client = providers.Factory(
         AsyncOpenAI,
@@ -60,7 +57,7 @@ class Container(containers.DeclarativeContainer):
     bot = providers.Factory(
         Bot,
         token=settings.bot.TOKEN,
-        default = providers.Factory(
+        default=providers.Factory(
             DefaultBotProperties, parse_mode=ParseMode.HTML
         ),
     )
