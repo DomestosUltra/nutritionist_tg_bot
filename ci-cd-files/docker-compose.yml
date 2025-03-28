@@ -12,6 +12,9 @@ x-backend-env: &bot-env
 
 services:
   backend:
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     build:
       context: ..
       dockerfile: ci-cd-files/Dockerfile
@@ -24,7 +27,9 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    environment: *bot-env
+    environment:
+      <<: *bot-env
+      NO_PROXY: 'api.openai.com, llm.api.cloud.yandex.net, api.proxyapi.ru'
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
@@ -82,7 +87,7 @@ services:
         condition: service_started
     networks:
       - network
-
+      
 networks:
   network:
     external: true

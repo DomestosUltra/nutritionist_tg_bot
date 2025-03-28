@@ -1,8 +1,12 @@
+import logging
 from typing import List, Dict
 from openai import AsyncOpenAI
 from fastapi import HTTPException
 
 from .base import LLMService
+
+
+logger = logging.getLogger(__name__)
 
 
 class OpenaiService(LLMService):
@@ -26,7 +30,7 @@ class OpenaiService(LLMService):
 
         messages.append(system_message)
         messages.append(text_message)
-        # client = AsyncOpenAI()
+        logger.debug(f"Sending OpenAI request: {messages}")
         try:
             completion = await self._llm_client.chat.completions.create(
                 model=self._model,
@@ -37,10 +41,12 @@ class OpenaiService(LLMService):
             )
 
             response = completion.choices[0].message.content
+            logger.debug(f"OpenAI response: {response}")
 
             return response
 
         except Exception as e:
+            logger.error(f"YandexGPT request failed: {str(e)}")
             raise HTTPException(
                 status_code=400, detail=f"Error with openai response: {e}"
             )

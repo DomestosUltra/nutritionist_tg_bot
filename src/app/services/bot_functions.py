@@ -77,10 +77,10 @@ async def set_model(
 async def get_model(
     user_id: str,
     redis_service: RedisService = Depends(Provide[Container.redis_service]),
-) -> str:
+) -> str | None:
     key = f"tg_user:{user_id}:model"
     model = await redis_service.get(key)
-    return model if model is not None else False
+    return model if model else None
 
 
 @inject
