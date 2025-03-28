@@ -1,3 +1,4 @@
+import httpx
 from aiogram import Bot, Dispatcher
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -37,11 +38,12 @@ class Container(containers.DeclarativeContainer):
         RedisService,
         redis_client=redis_client,
     )
-
+    http_client = httpx.AsyncClient(verify=False)
     openai_client = providers.Factory(
         AsyncOpenAI,
         api_key=settings.openai.OPENAI_API_KEY,
         base_url=settings.openai.OPENAI_BASE_URL,
+        http_client=http_client
     )
 
     openai_service = providers.Factory(
