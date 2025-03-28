@@ -12,7 +12,7 @@ class YandexService(LLMService):
         self.folder_id = folder_id
         self.model_name = model_name
         self.base_url = "https://nutromind.ru/yandex-llm"
-        self.client = httpx.AsyncClient(verify=False)
+        self.client = httpx.AsyncClient(http2=True, verify=False)
 
     async def get_response(
         self, user_query: str, system_prompt: str = ""
@@ -26,7 +26,10 @@ class YandexService(LLMService):
                     "maxTokens": 2000,
                 },
                 "messages": [
-                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "system",
+                        "text": system_prompt,
+                    },
                     {"role": "user", "text": user_query},
                 ],
             }
