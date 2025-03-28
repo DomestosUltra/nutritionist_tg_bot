@@ -39,7 +39,7 @@ class OpenaiSettings(BaseSettings):
 class YandexGPTSettings(BaseSettings):
     YANDEX_API_KEY: str = os.getenv("YANDEX_API_KEY")
     YANDEX_DEFAULT_MODEL: str = os.getenv("YANDEX_DEFAULT_MODEL")
-    YANDEX_BASE_URL: str = os.getenv("YANDEX_BASE_URL", "")
+    YANDEX_BASE_URL: str = os.getenv("YANDEX_BASE_URL", "https://llm.api.cloud.yandex.net/foundationModels/v1")
     YANDEX_FOLDER_ID: str = os.getenv("YANDEX_FOLDER_ID")
 
 

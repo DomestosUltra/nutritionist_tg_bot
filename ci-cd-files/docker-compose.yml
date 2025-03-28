@@ -24,7 +24,11 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    environment: *bot-env
+    environment:
+      <<: *bot-env
+      OPENAI_BASE_URL: "http://nginx:80/openai/v1"
+      YANDEX_BASE_URL: "http://nginx:80/yandex/foundationModels/v1"
+      NO_PROXY: 'api.openai.com, llm.api.cloud.yandex.net, api.proxyapi.ru'
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
