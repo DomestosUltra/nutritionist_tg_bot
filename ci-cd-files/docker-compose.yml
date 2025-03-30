@@ -49,6 +49,8 @@ services:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
       - ./redisdata:/data
+      - ../redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
     networks:
       - network
 
