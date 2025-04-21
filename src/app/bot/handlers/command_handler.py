@@ -10,6 +10,9 @@ from src.app.services.bot_functions import (
     is_first_start,
 )
 
+from src.app.db.crud import create_user_interaction
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +29,9 @@ async def set_bot_commands(bot: Bot):
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message):
-    await message.answer(
-        "*Привет\! 👋*\nЯ – бот\-диетолог, готов помочь тебе улучшить питание и здоровье\!"
-    )
+async def cmd_start(message: Message, db: AsyncSession):
+    response_text = "*Привет\! 👋*\nЯ – бот\-диетолог, готов помочь тебе улучшить питание и здоровье\!"
+    await message.answer(response_text)
 
     start = await is_first_start(message.from_user.id)
     if start:
@@ -45,13 +47,20 @@ async def cmd_start(message: Message):
         "Приветствие отправлено.",
     )
 
+    # Log interaction in the database
+    await create_user_interaction(
+        db,
+        message.from_user.id,
+        message.from_user.username or "",
+        "/start",
+        response_text,
+    )
+
 
 @router.message(Command("model"))
-async def cmd_model(message: Message):
-    await message.answer(
-        "*Выбор модели* 🤖\nПожалуйста, выбери одну из доступных моделей для получения рекомендаций:",
-        reply_markup=get_model_keyboard(),
-    )
+async def cmd_model(message: Message, db: AsyncSession):
+    response_text = "*Выбор модели* 🤖\nПожалуйста, выбери одну из доступных моделей для получения рекомендаций:"
+    await message.answer(response_text, reply_markup=get_model_keyboard())
 
     await log_interaction(
         message.from_user.id,
@@ -60,9 +69,18 @@ async def cmd_model(message: Message):
         "Изменена модель.",
     )
 
+    # Log interaction in the database
+    await create_user_interaction(
+        db,
+        message.from_user.id,
+        message.from_user.username or "",
+        "/model",
+        response_text,
+    )
+
 
 @router.message(Command("help"))
-async def cmd_help(message: Message):
+async def cmd_help(message: Message, db: AsyncSession):
     help_text = (
         "*Справка* ℹ️\n\n"
         "*Доступные команды:*\n"
@@ -74,6 +92,15 @@ async def cmd_help(message: Message):
     await message.answer(help_text)
 
     await log_interaction(
+        message.from_user.id,
+        message.from_user.username or "",
+        "/help",
+        help_text,
+    )
+
+    # Log interaction in the database
+    await create_user_interaction(
+        db,
         message.from_user.id,
         message.from_user.username or "",
         "/help",

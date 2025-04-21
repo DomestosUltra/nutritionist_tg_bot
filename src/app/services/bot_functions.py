@@ -1,11 +1,14 @@
 import logging
 from fastapi import Depends
 from dependency_injector.wiring import inject, Provide
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.app.integrations.redis import RedisService
 from src.app.core.containers import Container
 from src.app.core.config import settings
+from src.app.db.session import get_db
+from src.app.db.crud import create_user_interaction
 
 
 logger = logging.getLogger(__name__)
@@ -95,7 +98,26 @@ async def is_response_processing(
     return True
 
 
+@inject
 async def log_interaction(
-    user_id: int, username: str, message_text: str, response_text: str
+    user_id: int,
+    username: str,
+    message_text: str,
+    response_text: str,
+    db: AsyncSession = Depends(get_db),
 ):
+    # Log to console
     logger.info(f"{user_id}||{username}||{message_text}||{response_text}")
+
+    # Save to database
+    try:
+        await create_user_interaction(
+            db=db,
+            user_id=str(user_id),
+            username=username,
+            user_query=message_text,
+            bot_response=response_text,
+        )
+        logger.info(f"User interaction saved to database: user_id={user_id}")
+    except Exception as e:
+        logger.error(f"Failed to save user interaction to database: {e}")

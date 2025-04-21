@@ -30,6 +30,14 @@ class RabbitSettings(BaseSettings):
     RABBITMQ_PASS: str = os.getenv("RABBITMQ_PASS", "guest")
 
 
+class PostgresSettings(BaseSettings):
+    HOST: str = os.getenv("POSTGRES_HOST", "postgres")
+    PORT: str = os.getenv("POSTGRES_PORT", "5432")
+    USER: str = os.getenv("POSTGRES_USER", "postgres")
+    PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
+    DB: str = os.getenv("POSTGRES_DB", "nutritionist_bot")
+
+
 class OpenaiSettings(BaseSettings):
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
     OPENAI_DEFAULT_MODEL: str = os.getenv("OPENAI_DEFAULT_MODEL")
@@ -56,6 +64,7 @@ class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     redis: RedisSettings = RedisSettings()
     rabbit: RabbitSettings = RabbitSettings()
+    postgres: PostgresSettings = PostgresSettings()
     openai: OpenaiSettings = OpenaiSettings()
     bot: BotSettings = BotSettings()
     yandex: YandexGPTSettings = YandexGPTSettings()

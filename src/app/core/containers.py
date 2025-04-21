@@ -23,6 +23,7 @@ class Container(containers.DeclarativeContainer):
             "src.app.bot.handlers.messages_handler",
             "src.app.bot.handlers.command_handler",
             "src.app.services.bot_functions",
+            "src.app.db.crud",
         ]
     )
 
@@ -82,6 +83,7 @@ class TestContainer(Container):
             "src.app.bot.handlers.messages_handler",
             "src.app.bot.handlers.command_handler",
             "src.app.services.bot_functions",
+            "src.app.db.crud",
         ]
     )
 

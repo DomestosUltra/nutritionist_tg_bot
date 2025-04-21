@@ -3,7 +3,7 @@ import logging
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.app.core.config import create_app, Settings
+from src.app.core.config import Settings
 from src.app.core.containers import Container, TestContainer
 from src.app.main import app
 

@@ -12,6 +12,8 @@ from src.app.core.config import create_app, settings
 from src.app.core.containers import Container
 from src.app.utils.log_config import LogConfig
 from src.app.bot.handlers import command_handler, messages_handler
+from src.app.db.utils import create_tables
+from src.app.db.session import engine
 
 from src.app.bot.main import bot, dp
 from src.app.bot.handlers.command_handler import set_bot_commands
@@ -37,6 +39,7 @@ container.wire(
         "src.app.bot.handlers.messages_handler",
         "src.app.bot.handlers.command_handler",
         "src.app.services.bot_functions",
+        "src.app.db.crud",
     ]
 )
 
@@ -48,6 +51,11 @@ async def lifespan(
 ):
     dp.include_router(command_handler.router)
     dp.include_router(messages_handler.router)
+
+    # Initialize database
+    logger.info("Initializing database...")
+    await create_tables(engine)
+    logger.info("Database initialized successfully")
 
     await set_bot_commands(bot)
 

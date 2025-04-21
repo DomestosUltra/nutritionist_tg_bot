@@ -8,6 +8,7 @@ from typing import Dict
 from aiogram import Bot
 from logging.config import dictConfig
 from aiogram.enums import ParseMode
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.utils.log_config import LogConfig
 from src.app.core.config import settings
@@ -20,6 +21,8 @@ from src.app.bot.main import bot
 from src.app.utils.general import (
     convert_to_allowed_tags,
 )
+from src.app.db.session import async_session
+from src.app.db.crud import get_user_interactions, update_interaction_response
 
 
 log_config = LogConfig()
@@ -86,6 +89,33 @@ class LLMTaskHandler(BaseTaskHandler):
                 f"task:{task_id}:response", response_text, ex=60
             )
 
+            # Save the bot response to the database
+            try:
+                async with async_session() as db:
+                    # Get the latest interaction for this user
+                    user_interactions = await get_user_interactions(
+                        db=db, user_id=user_id, limit=1
+                    )
+                    if user_interactions:
+                        # Update the most recent interaction with the bot's response
+                        latest_interaction = user_interactions[0]
+                        await update_interaction_response(
+                            db=db,
+                            interaction_id=latest_interaction.id,
+                            bot_response=response_text,
+                        )
+                        logger.info(
+                            f"Updated interaction record for user {user_id} with bot response"
+                        )
+                    else:
+                        logger.warning(
+                            f"No recent interaction found for user {user_id}"
+                        )
+            except Exception as db_error:
+                logger.error(
+                    f"Failed to save bot response to database: {db_error}"
+                )
+
         except Exception as e:
             logger.error(f"Ошибка при обработке задачи {task_id}: {e}")
             await self.redis_service.set(f"task:{task_id}:status", "failed")
@@ -138,6 +168,7 @@ if __name__ == "__main__":
             "src.app.bot.handlers.messages_handler",
             "src.app.bot.handlers.command_handler",
             "src.app.services.bot_functions",
+            "src.app.db.crud",
         ]
     )
 
